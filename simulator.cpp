@@ -5,6 +5,12 @@
 #include<QMessageBox>
 #include <QCoreApplication>
 QString to_binary(QString code);
+int zero = 0;
+int const at = 1;
+int const v = 2;
+int const a=4;
+int const s = 16;
+int const t = 8;
 simulator::simulator(QWidget *parent) : QWidget(parent),ui(new Ui::simulator)
 {
     ui->setupUi(this);
@@ -28,15 +34,29 @@ QString decimal_to_binary(int num, int digits){
 
 }
 
+QString register_number(QString reg){
+
+    int num;
+    if(reg =="zero")return "0";
+    else if (reg =="ra")return "1";
+    else if (reg[0]=='a')num = a;
+    else if(reg[0]=='v')num = v;
+     else if(reg[0]=='s')num = s;
+     else if(reg[0]=='t')num = t;
+
+    num += reg[1].digitValue();
+
+
+    return  decimal_to_binary(num,5);
+
+
+}
+
 QString to_binary(QString code){
 QString binary = "";
+QString rs,rd,rt,shamt,funct,immediate;
 
-int zero = 0;
-int at = 1;
-int v = 2;
-int a=4;
-int s = 16;
-int t = 8;
+
 QStringList list = code.split(QRegExp("\\s+"), QString::SkipEmptyParts);
 
 if(list[0]== "j" ){
@@ -55,42 +75,157 @@ else if ( list[0]== "jal"){
 else if ( list[0]== "add"){
     //Add
 
+    binary += decimal_to_binary(0,6);
+
+    rs= register_number(list[2]);
+    rt= register_number(list[3]);
+    rd= register_number(list[1]);
+    shamt = decimal_to_binary(0,5);
+    funct = decimal_to_binary(32,6);
+
+    binary += rs + rt+ rd + shamt + funct ;
+
+
+
+
 }
 else if ( list[0]== "sw"){
     //Sw
 
+
+    binary += decimal_to_binary(43,6);
+
+    rs= register_number(list[3]);
+    rt= register_number(list[1]);
+    immediate = decimal_to_binary(list[2].toInt(),16);
+
+
+    binary += rs + rt+ immediate ;
+
+
 }
 else if ( list[0]== "lw"){
     //Lw
+    binary += decimal_to_binary(35,6);
+
+    rs= register_number(list[3]);
+    rt= register_number(list[1]);
+    immediate = decimal_to_binary(list[2].toInt(),16);
+
+
+    binary += rs + rt + immediate ;
+
 
 }
 else if ( list[0]== "sll"){
     //Sll
+    binary += decimal_to_binary(0,6);
+    rs=  decimal_to_binary(0,5);
+    rt= register_number(list[2]);
+    rd= register_number(list[1]);
 
+    shamt = decimal_to_binary(list[3].toInt(),5);
+    funct = decimal_to_binary(0,6);
+
+    binary += rs + rt+ rd + shamt + funct ;
 }
+
+else if ( list[0]== "slt"){
+    //SetLessThan
+    binary += decimal_to_binary(0,6);
+    rs= register_number(list[2]);
+    rt= register_number(list[3]);
+    rd= register_number(list[1]);
+
+    shamt = decimal_to_binary(0,5);
+    funct = decimal_to_binary(42,6);
+
+    binary += rs + rt+ rd + shamt + funct ;
+}
+
+
 else if ( list[0]== "and"){
     //And
+
+    binary += decimal_to_binary(0,6);
+
+    rs= register_number(list[2]);
+    rt= register_number(list[3]);
+    rd= register_number(list[1]);
+
+    shamt = decimal_to_binary(0,5);
+    funct = decimal_to_binary(36,6);
+
+    binary += rs + rt+ rd + shamt + funct ;
 
 }
 else if ( list[0]== "or"){
     //Or
 
+    binary += decimal_to_binary(0,6);
+
+    rs= register_number(list[2]);
+    rt= register_number(list[3]);
+    rd= register_number(list[1]);
+
+    shamt = decimal_to_binary(0,5);
+    funct = decimal_to_binary(37,6);
+
+    binary += rs + rt+ rd + shamt + funct ;
+
 }
 else if ( list[0]== "beq"){
     //Beq
+
+    binary += decimal_to_binary(4,6);
+
+    rs= register_number(list[1]);
+    rt= register_number(list[2]);
+
+    immediate = decimal_to_binary(list[3].toInt(),16);
+
+    binary += rs + rt + immediate ;
 
 }
 else if ( list[0]== "jr"){
     //Jr
 
+    binary += decimal_to_binary(0,6);
+
+    rs= decimal_to_binary(list[1].toInt(),5);
+    rt= decimal_to_binary(0,5);
+    rd= decimal_to_binary(0,5);
+    shamt = decimal_to_binary(0,5);
+    funct = decimal_to_binary(8,6);
+
+    binary += rs + rt+ rd + shamt + funct ;
+
+
 }
 else if ( list[0]== "addi"){
     //AddImmidiate
 
+
+    binary += decimal_to_binary(8,6);
+
+    rs= register_number(list[2]);
+    rt= register_number(list[1]);
+
+    immediate = decimal_to_binary(list[3].toInt(),16);
+
+    binary += rs + rt+ immediate ;
 }
 else if ( list[0]== "ori"){
     //OrImmidiate
 
+    binary += decimal_to_binary(13,6);
+
+    rs= register_number(list[2]);
+    rt= register_number(list[1]);
+
+    immediate = decimal_to_binary(list[3].toInt(),16);
+
+    binary += rs + rt+  immediate ;
 }
 
 
@@ -143,16 +278,24 @@ void simulator::on_run_clicked()
 
 
     QString code = ui->code_textedit->toPlainText();
-  QString convertedString=  to_binary(code);
 
   QFile file ("C:\\Users\\BodaSadalla\\Desktop\\qt\\out.txt");
 
+  QStringList strList = code.split(QRegExp("[\n]"),QString::SkipEmptyParts);
 
-    if (file.open(QIODevice::ReadWrite))
-    {
-        QTextStream stream(&file);
-        stream<< convertedString<<endl;
-    }
+  if (file.open(QIODevice::ReadWrite))
+  {
+      QTextStream stream(&file);
+      for(auto i : strList){
+      QString convertedString=  to_binary(i);
+
+      stream<< convertedString<<endl;
+
+
+      }
+
+  }
+
 }
 
 
