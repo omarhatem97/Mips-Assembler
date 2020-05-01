@@ -29,6 +29,7 @@ SOURCES += \
         simulator.cpp
 
 HEADERS += \
+        boda.h \
         simulator.h
 
 FORMS += \

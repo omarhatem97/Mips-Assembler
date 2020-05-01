@@ -18,9 +18,12 @@ public:
 private slots:
     void on_run_clicked();
 
+    void on_pushButton_clicked();
+
 private:
     Ui::simulator *ui;
     void get_data();// saves the register file data
+    void compare_results(); // compare testcases like online judge
 };
 
 #endif // SIMULATOR_H
