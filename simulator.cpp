@@ -1,6 +1,6 @@
 #include "simulator.h"
 #include "ui_simulator.h"
-#include "boda.h"
+#include "logic.h"
 #include<string>
 #include<QFile>
 #include<QTextStream>
